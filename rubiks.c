@@ -39,8 +39,9 @@
  Y Y Y
  */
 
+
 #include <stdio.h>
-#include <msp430.h>
+#include <stdlib.h>
 #include <stdbool.h>
 
 extern char rubiks[6][3][3] =
@@ -49,7 +50,7 @@ extern char rubiks[6][3][3] =
           { { 'B', 'B', 'B' }, { 'B', 'B', 'B' }, { 'B', 'B', 'B' } }, {
                   { 'O', 'O', 'O' }, { 'O', 'O', 'O' }, { 'O', 'O', 'O' } },
           { { 'R', 'R', 'R' }, { 'R', 'R', 'R' }, { 'R', 'R', 'R' } }, {
-                  { 'Y', 'Y', 'Y' }, { 'Y', 'Y', 'Y' }, { 'Y', 'Y', 'Y' } } }; // the array for all of the rubik's characters
+                  { 'Y', 'Y', 'Y' }, { 'Y', 'Y', 'Y' }, { 'Y', 'Y', 'Y' } } }; // the array for all the rubik's characters
 
 extern int rmap[6][3][3] =
           { { { 1, 2, 3 }, { 4, 5, 6 }, { 7, 8, 9 } },
@@ -64,14 +65,253 @@ void printSides(); // initialization of the function for printing all sides
 void printTS(); // initialization of the function for the printing of temporary sides
 void rotate(int side, char cw); // initialization of the rotate function
 
-int main(void)
-{
-    WDTCTL = WDTPW | WDTHOLD;	// stops watchdog timer
+void askUser();
 
-    printSides();
+int main(void) {
+
+
+     printf("Hello, welcome to my Rubiks Cube code!\n");
+     printSides();
+     printf("\nThis is the cube in folds, with the face in the middle (3rd side down) being the front of the cube \n");
+     printf("So, what would you like to do?\n");
+
+     askUser();
 
     return 0;
 }
+
+extern bool quik = false; // boolean for quick mode
+extern bool e = true; // controls whether program continues to iterate or exit
+
+void quikOp();
+void randomize();
+
+void askUser() {
+    int c, nroc, i, dir, side; // c is the choice the user makes in the console | nroc is the number of the row or column the user chooses | i is the amount of times a rotation will be executed | dir is the direction of the rotation | side
+    char hov, rocpos, sta; // hov is the choice the user makes in the console for horizontal / vertical actions | rocpos is the position of the row or column | sta is the starting face (front or adjacent)
+
+        printf("\n1. Rotate cube\n2. Quick Mode\n3. Randomize\n4. Reset\n5. Exit\n");
+        scanf("%d", &c);
+
+        switch(c) {
+            case 1:
+                printf("Start from front (f) or adjacent (a) side\n");
+                scanf(" %c", &sta);
+
+                if(sta == 'a' || sta == 'f') {
+                    printf("\nHorizontal (h) or Vertical (v):\n");
+                    scanf(" %c", &hov);
+                }
+
+                if(hov == 'h' || hov == 'v') {
+                    printf("\nTop (t or T), Middle (m or M), or Bottom (b or B) row:\n");
+                    scanf(" %c", &rocpos);
+                }
+                else
+                    break;
+
+                if(rocpos == 't' || rocpos == 'T' || rocpos == 'm' || rocpos == 'M' || rocpos == 'b' || rocpos == 'B') {
+                    printf("\nWhich direction, Clockwise (w) or Counter-clockwise (c):\n");
+                    scanf(" %c", &dir);
+                }
+                else
+                    break;
+
+                if(dir == 'w' || dir == 'c') {
+                    printf("\nHow many times?\n");
+                    scanf(" %d", &i);
+                }
+                else
+                    break;
+
+                if(rocpos == 't' || rocpos == 'T') // conditionals to decide the number of the row or columnn
+                    nroc = 0;
+                else if(rocpos == 'm' || rocpos == 'M')
+                    nroc = 1;
+                else if(rocpos == 'b' || rocpos == 'B')
+                    nroc = 2;
+                else
+                    break;
+
+                if (sta == 'f') { // conditionals to decide the starting face
+                    side = 0;
+                }
+                else if(sta == 'a') {
+                    side = 1;
+                }
+                else
+                    break;
+
+                    if(i == 1) {
+                        printf("%c%c%d", dir, hov, nroc);
+                        turn(dir, side, hov, nroc);
+                        printSides();
+                    }
+                    else if (i > 1) {
+                        for(int a = 0; a < i; a++)
+                            turn(dir, side, hov, nroc);
+                            printSides();
+                    }
+
+             break;
+
+            case 2:
+                printf("\n1. Start\n2. Guide\n3. Exit\n");
+                scanf(" %d", &c);
+                if(c == 2) {
+                    printf("Operation 1: Front Top Horizontal\n");
+                    printf("Operation 2: Front Middle Horizontal\n");
+                    printf("Operation 3: Front Bottom Horizontal\n");
+                    printf("Operation 4: Front Left Vertical\n");
+                    printf("Operation 5: Front Middle Vertical\n");
+                    printf("Operation 6: Front Right Vertical\n");
+                    printf("Operation 7: Adjacent Left Vertical\n");
+                    printf("Operation 8: Adjacent Middle Vertical\n");
+                    printf("Operation 9: Adjacent Right Vertical\n");
+                    printf("After one of these operations, you would then type clockwise (w) or counter-clockwise (c), and the number of iterations you want the spin to be executed");
+                    printf("To exit: Just type '0'\n");
+                    printf("Example: 1c3 would be front (side 0), top, horizontal, clockwise, executed 3 times.\n");
+                    printf("\n1. Start\n2. Exit\n");
+                    scanf(" %c", &c);
+                }
+                if(c == 1) {
+                    quikOp();
+                    askUser();
+                }
+                else if (c == 2) {
+                    askUser();
+                    break;
+                }
+
+        case 3: ;
+            randomize();
+            break;
+
+        case 4: ;
+            int y, z;
+            for(y = 0; y < 3; y++)
+                for(z = 0; z < 3; z++)
+                    rubiks[0][y][z] = 'W';
+            for(y = 0; y < 3; y++)
+                for(z = 0; z < 3; z++)
+                    rubiks[1][y][z] = 'G';
+            for(y = 0; y < 3; y++)
+                for(z = 0; z < 3; z++)
+                    rubiks[2][y][z] = 'B';
+            for(y = 0; y < 3; y++)
+                for(z = 0; z < 3; z++)
+                    rubiks[3][y][z] = 'O';
+            for(y = 0; y < 3; y++)
+                for(z = 0; z < 3; z++)
+                    rubiks[4][y][z] = 'R';
+            for(y = 0; y < 3; y++)
+                for(z = 0; z < 3; z++)
+                    rubiks[5][y][z] = 'Y';
+
+            printSides();
+
+            break;
+
+        case 5:
+            e = false;
+            break;
+
+        default: ;
+    }
+
+    if(e == true) {
+        askUser();
+    }
+
+}
+
+void quikOp() {
+    printf("check");
+    bool kpgn = true; // Keep going is default set true
+    int opnum, it; // operation number | iteration number
+    char cow; // clockwise or counter-clockwise
+
+    while( kpgn == true ) {
+
+        scanf(" %d%c%d", &opnum, &cow, &it);
+
+        if(opnum == 0) {
+            kpgn = false;
+        }
+        for(int i = 0; i < it; i++) {
+            if (opnum == 1) {
+                turn(cow, 0, 'h', 0);
+            }
+            else if (opnum == 2) {
+                turn(cow, 0, 'h', 1);
+            }
+            else if (opnum == 3) {
+                turn(cow, 0, 'h', 2);
+            }
+            else if (opnum == 4) {
+                turn(cow, 0, 'v', 0);
+            }
+            else if (opnum == 5) {
+                turn(cow, 0, 'v', 1);
+            }
+            else if (opnum == 6) {
+                turn(cow, 0, 'v', 2);
+            }
+            else if (opnum == 7) {
+                turn(cow, 1, 'v', 0);
+            }
+            else if (opnum == 8) {
+                turn(cow, 1, 'v', 1);
+            }
+            else if (opnum == 9) {
+                turn(cow, 1, 'v', 2);
+            }
+            printSides();
+        }
+    }
+}
+
+void randomize() {
+    int r, r2;
+    char cow;
+
+    for(int i = 0; i < 100; i++) {
+
+        r = (rand() % 6) + 1;
+        r2 = (rand() % 2);
+
+        if(r2 < 1)
+            cow = 'w';
+        else if(r2 > 1)
+            cow = 'c';
+
+        if (r == 1) {
+            turn(cow, 0, 'h', 0);
+        }
+        else if (r == 2) {
+            turn(cow, 0, 'h', 1);
+        }
+        else if (r == 3) {
+            turn(cow, 0, 'h', 2);
+        }
+        else if (r == 4) {
+            turn(cow, 0, 'v', 0);
+        }
+        else if (r == 5) {
+            turn(cow, 0, 'v', 1);
+        }
+        else if (r == 6) {
+            turn(cow, 0, 'v', 2);
+        }
+
+    }
+
+    printSides();
+}
+
+
+
+
 
 extern char tempRoC[12] = { 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a' }; // temporary row or column to facilitate transfer
 
@@ -93,8 +333,7 @@ void turn(char cw, int side, char roc, int numroc) // utilizes the different met
                 turncw(side, roc, numroc);
                 break;
             }
-
-            else if ((numroc == 0) || (numroc == 2))
+            if ((numroc == 0) || (numroc == 2))
             {
                 turncw(side, roc, numroc);
                 if (numroc == 0)
@@ -116,7 +355,7 @@ void turn(char cw, int side, char roc, int numroc) // utilizes the different met
                 turncw(side, roc, numroc);
                 break;
             }
-            else if ((numroc == 0) || (numroc == 2))
+            if ((numroc == 0) || (numroc == 2))
             {
                 turncw(side, roc, numroc);
                 if (side == 0)
@@ -163,7 +402,7 @@ void turn(char cw, int side, char roc, int numroc) // utilizes the different met
                 turnccw(side, roc, numroc);
                 break;
             }
-            else if ((numroc == 0) || (numroc == 2))
+            if ((numroc == 0) || (numroc == 2))
             {
                 turnccw(side, roc, numroc);
                 if (numroc == 0)
@@ -177,14 +416,14 @@ void turn(char cw, int side, char roc, int numroc) // utilizes the different met
             }
             break;
         }
-        else if (roc == 'v') // case for vertical
+        if (roc == 'v') // case for vertical
         {
             if (numroc == 1)
             {
                 turnccw(side, roc, numroc);
                 break;
             }
-            else if ((numroc == 0) || (numroc == 2))
+            if ((numroc == 0) || (numroc == 2))
             {
                 turnccw(side, roc, numroc);
                 if (side == 1)
@@ -234,6 +473,7 @@ void turn(char cw, int side, char roc, int numroc) // utilizes the different met
                 break;
             }
         }
+    default: ;
     }
 }
 
@@ -591,6 +831,7 @@ void nexttSide(char dir, char dir2) // makes tempSide the next side in line depe
                 break;
             case 2: // Right to Front
                 tempSide = 0;
+            default: ;
             }
         }
 
@@ -610,6 +851,7 @@ void nexttSide(char dir, char dir2) // makes tempSide the next side in line depe
             case 1: // Left to Back
                 tempSide = 0;
                 break;
+            default: ;
             }
         }
     }
@@ -633,7 +875,7 @@ void nexttSide(char dir, char dir2) // makes tempSide the next side in line depe
                 case 4: // Bottom to Front
                     tempSide = 0;
                     break;
-
+                default: ;
                 }
             }
             else
@@ -653,6 +895,7 @@ void nexttSide(char dir, char dir2) // makes tempSide the next side in line depe
                 case 3: // Top to Left
                     tempSide = 1;
                     break;
+                default: ;
                 }
             }
         }
@@ -674,6 +917,7 @@ void nexttSide(char dir, char dir2) // makes tempSide the next side in line depe
                 case 3: // Top to Front
                     tempSide = 0;
                     break;
+                default: ;
                 }
             }
             else
@@ -693,6 +937,7 @@ void nexttSide(char dir, char dir2) // makes tempSide the next side in line depe
                 case 4: // Bottom to Left
                     tempSide = 1;
                     break;
+                default: ;
                 }
             }
 
@@ -751,6 +996,7 @@ void printSides() // prints the six faces of the cube in a cross
     }
 
     printSide(4, 2);
+    printf("\n");
 
 }
 
