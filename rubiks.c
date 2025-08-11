@@ -76,7 +76,6 @@ int main(void) {
      printf("So, what would you like to do?\n");
 
      askUser();
-
     return 0;
 }
 
@@ -87,8 +86,8 @@ void quikOp();
 void randomize();
 
 void askUser() {
-    int c, nroc, i, dir, side; // c is the choice the user makes in the console | nroc is the number of the row or column the user chooses | i is the amount of times a rotation will be executed | dir is the direction of the rotation | side
-    char hov, rocpos, sta; // hov is the choice the user makes in the console for horizontal / vertical actions | rocpos is the position of the row or column | sta is the starting face (front or adjacent)
+    int c, nroc, i, dir = 0, side; // c is the choice the user makes in the console | nroc is the number of the row or column the user chooses | i is the amount of times a rotation will be executed | dir is the direction of the rotation | side
+    char hov, rocpos = 0, sta; // hov is the choice the user makes in the console for horizontal / vertical actions | rocpos is the position of the row or column | sta is the starting face (front or adjacent)
 
         printf("\n1. Rotate cube\n2. Quick Mode\n3. Randomize\n4. Reset\n5. Exit\n");
         scanf("%d", &c);
@@ -107,22 +106,21 @@ void askUser() {
                     printf("\nTop (t or T), Middle (m or M), or Bottom (b or B) row:\n");
                     scanf(" %c", &rocpos);
                 }
-                else
-                    break;
+
 
                 if(rocpos == 't' || rocpos == 'T' || rocpos == 'm' || rocpos == 'M' || rocpos == 'b' || rocpos == 'B') {
                     printf("\nWhich direction, Clockwise (w) or Counter-clockwise (c):\n");
                     scanf(" %c", &dir);
                 }
-                else
-                    break;
 
-                if(dir == 'w' || dir == 'c') {
+
+
+                if('w' == dir || 'c' == dir) {
                     printf("\nHow many times?\n");
                     scanf(" %d", &i);
                 }
-                else
-                    break;
+
+
 
                 if(rocpos == 't' || rocpos == 'T') // conditionals to decide the number of the row or columnn
                     nroc = 0;
@@ -130,8 +128,8 @@ void askUser() {
                     nroc = 1;
                 else if(rocpos == 'b' || rocpos == 'B')
                     nroc = 2;
-                else
-                    break;
+
+
 
                 if (sta == 'f') { // conditionals to decide the starting face
                     side = 0;
@@ -139,8 +137,8 @@ void askUser() {
                 else if(sta == 'a') {
                     side = 1;
                 }
-                else
-                    break;
+
+
 
                     if(i == 1) {
                         printf("%c%c%d", dir, hov, nroc);
@@ -999,4 +997,3 @@ void printSides() // prints the six faces of the cube in a cross
     printf("\n");
 
 }
-
