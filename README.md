@@ -1,1 +1,7 @@
-Program produces a Rubiks cube in the console and uses a rudimentary console UI to take commands from the user, including commands like turning, randomizing or resetting the cube, with a quick operation mode for turning the cube available for efficiency.
+# Rubik's Cube by Christopher Bergsveinsson
+
+* Custom State Representation: Models a 3D cube state in memory using a multi-dimensional character array in the form of char[6][3][3].
+
+* Precise Rotation Engine: Handles complex clockwise and counter-clockwise matrix transformations across horizontal and vertical slice planes, updating adjacent face states accurately.
+
+* Interactive CLI: Supports manual move inputs, a Quick Mode with predefined operations, automated scrambling, and state resetting.
